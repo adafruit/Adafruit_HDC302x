@@ -16,7 +16,12 @@ enum HDC302x_Commands {
     ENABLE_HEATER = 0x306D,     // Command to enable heater
     DISABLE_HEATER = 0x3066,     // Command to disable heater
     READ_STATUS_REGISTER = 0xF32D, // Command to read the status register
-    MEASUREMENT_READOUT_AUTO_MODE = 0xE000  // Measurement Readout ± Auto Mode
+    CLEAR_STATUS_REGISTER = 0x3041, // Command to clear the status register
+    MEASUREMENT_READOUT_AUTO_MODE = 0xE000,  // Measurement Readout ± Auto Mode
+    SET_LOW_ALERT = 0x6100,     // Configure ALERT Thresholds for Set Low Alert
+    SET_HIGH_ALERT = 0x611D,    // Configure ALERT Thresholds for Set High Alert
+    CLR_LOW_ALERT = 0x610B,     // Configure ALERT Thresholds for Clear Low Alert
+    CLR_HIGH_ALERT = 0x6116     // Configure ALERT Thresholds for Clear High Alert
 };
 
 typedef enum {
@@ -65,24 +70,33 @@ public:
     bool begin(uint8_t i2cAddr = 0x44, TwoWire *wire = &Wire);
     bool reset();
     uint16_t readStatus();
+    bool clearStatusRegister();
+
     uint16_t readManufacturerID();
     bool readNISTID(uint8_t nist[6]);
+
     bool heaterEnable(HDC302x_HeaterPower power);
     bool isHeaterOn();
+
     bool writeOffsets(double T, double RH);
     bool readOffsets(double &T, double &RH);
 
     void setAutoMode(hdcAutoMode_t mode);
     hdcAutoMode_t getAutoMode() const;
     bool readAutoTempRH(double &temp, double &RH);
-
     bool readTemperatureHumidityOnDemand(double &temp, double &RH, hdcTriggerMode_t mode);
+
+    bool setHighAlert(float T, float RH);
+    bool setLowAlert(float T, float RH);
+    bool clearHighAlert(float T, float RH);
+    bool clearLowAlert(float T, float RH);
 
     uint8_t calculateCRC8(const uint8_t *data, int len);
 
 private:
     uint8_t calculateOffset(double f, bool isTemp);
     double invertOffset(uint8_t offset, bool isTemp);
+    bool alertCommand(uint16_t cmd, float T, float RH);
 
     Adafruit_I2CDevice *i2c_dev = nullptr;
     bool writeCommand(uint16_t command);

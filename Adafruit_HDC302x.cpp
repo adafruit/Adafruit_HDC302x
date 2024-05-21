@@ -27,6 +27,7 @@ bool Adafruit_HDC302x::begin(uint8_t i2cAddr, TwoWire *wire) {
   if (!reset()) {
     return false;
   }
+  clearStatusRegister();
   
   uint16_t manufacturerID;
   if (!writeCommandReadData(HDC302x_Commands::READ_MANUFACTURER_ID, manufacturerID) || manufacturerID != 0x3000) {
@@ -239,7 +240,73 @@ bool Adafruit_HDC302x::heaterEnable(HDC302x_HeaterPower power) {
     }
 }
 
+/**
+ * Sends an alert command with the specified temperature and humidity thresholds.
+ * 
+ * @param cmd The command to send.
+ * @param T The temperature threshold value in degrees Celsius.
+ * @param RH The relative humidity threshold value in percentage.
+ * @return true if the command was successfully sent, otherwise false.
+ */
+bool Adafruit_HDC302x::alertCommand(uint16_t cmd, float T, float RH) {
+    // Convert temperature and humidity to 16-bit binary values
+    uint16_t rawTemp = static_cast<uint16_t>(((T + 45.0) / 175.0) * 65535.0);
+    uint16_t rawRH = static_cast<uint16_t>((RH / 100.0) * 65535.0);
 
+    // Retain the 7 MSBs for RH and the 9 MSBs for T
+    uint16_t msbRH = (rawRH >> 9) & 0x7F;
+    uint16_t msbT = (rawTemp >> 7) & 0x1FF;
+
+    // Concatenate the 7 MSBs for RH with the 9 MSBs for T
+    uint16_t threshold = (msbRH << 9) | msbT;
+
+    // Use writeCommandData to send the command and data
+    return writeCommandData(cmd, threshold);
+}
+
+/**
+ * Sets the high alert thresholds for temperature and humidity.
+ * 
+ * @param T The temperature threshold value in degrees Celsius.
+ * @param RH The relative humidity threshold value in percentage.
+ * @return true if the command was successfully sent, otherwise false.
+ */
+bool Adafruit_HDC302x::setHighAlert(float T, float RH) {
+    return alertCommand(SET_HIGH_ALERT, T, RH);
+}
+
+/**
+ * Sets the low alert thresholds for temperature and humidity.
+ * 
+ * @param T The temperature threshold value in degrees Celsius.
+ * @param RH The relative humidity threshold value in percentage.
+ * @return true if the command was successfully sent, otherwise false.
+ */
+bool Adafruit_HDC302x::setLowAlert(float T, float RH) {
+    return alertCommand(SET_LOW_ALERT, T, RH);
+}
+
+/**
+ * Clears the high alert thresholds for temperature and humidity.
+ * 
+ * @param T The temperature threshold value in degrees Celsius.
+ * @param RH The relative humidity threshold value in percentage.
+ * @return true if the command was successfully sent, otherwise false.
+ */
+bool Adafruit_HDC302x::clearHighAlert(float T, float RH) {
+    return alertCommand(CLR_HIGH_ALERT, T, RH);
+}
+
+/**
+ * Clears the low alert thresholds for temperature and humidity.
+ * 
+ * @param T The temperature threshold value in degrees Celsius.
+ * @param RH The relative humidity threshold value in percentage.
+ * @return true if the command was successfully sent, otherwise false.
+ */
+bool Adafruit_HDC302x::clearLowAlert(float T, float RH) {
+    return alertCommand(CLR_LOW_ALERT, T, RH);
+}
 
 /**
  * Reads the status register.
@@ -250,6 +317,15 @@ uint16_t Adafruit_HDC302x::readStatus() {
   uint16_t status = 0;
   writeCommandReadData(HDC302x_Commands::READ_STATUS_REGISTER, status);
   return status;
+}
+
+/**
+ * Clears the status register.
+ * 
+ * @return true if the command was successfully sent, otherwise false.
+ */
+bool Adafruit_HDC302x::clearStatusRegister() {
+    return writeCommand(HDC302x_Commands::CLEAR_STATUS_REGISTER);
 }
 
 /**
