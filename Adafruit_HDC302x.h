@@ -65,7 +65,7 @@ typedef enum {
   HEATER_FULL_POWER = 0x3FFF
 } HDC302x_HeaterPower;
 
-///< Functions and data for interfacing HDC302x
+/*** Functions and data for interfacing HDC302x */
 class Adafruit_HDC302x {
 public:
   Adafruit_HDC302x();
