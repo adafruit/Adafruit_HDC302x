@@ -20,7 +20,7 @@ enum HDC302x_Commands {
   DISABLE_HEATER = 0x3066,       // Command to disable heater
   READ_STATUS_REGISTER = 0xF32D, // Command to read the status register
   CLEAR_STATUS_REGISTER = 0x3041, // Command to clear the status register
-  MEASUREMENT_READOUT_AUTO_MODE = 0xE000, // Measurement Readout ± Auto Mode
+  MEASUREMENT_READOUT_AUTO_MODE = 0xE000, // Measurement Readout Auto Mode
   SET_LOW_ALERT = 0x6100,  // Configure ALERT Thresholds for Set Low Alert
   SET_HIGH_ALERT = 0x611D, // Configure ALERT Thresholds for Set High Alert
   CLR_LOW_ALERT = 0x610B,  // Configure ALERT Thresholds for Clear Low Alert
