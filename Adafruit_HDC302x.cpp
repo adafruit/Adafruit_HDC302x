@@ -13,6 +13,8 @@ Adafruit_HDC302x::Adafruit_HDC302x() { currentAutoMode = EXIT_AUTO_MODE; }
  * @return true if initialization was successful, otherwise false.
  */
 bool Adafruit_HDC302x::begin(uint8_t i2cAddr, TwoWire *wire) {
+  delay(5); // wait for device to be ready
+
   if (i2c_dev) {
     delete i2c_dev;
   }
