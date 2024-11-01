@@ -102,10 +102,12 @@ bool Adafruit_HDC302x::sendCommandReadTRH(uint16_t command, double &temp,
     return false;
   }
 
+  // Wait for conversion (tmeas in datasheet table 7.5)
+  delay(20);
+
+  // Read results
   uint8_t buffer[6];
-  while (!i2c_dev->read(buffer, 6)) {
-    delay(1); // Wait and retry if NAK received
-  }
+  i2c_dev->read(buffer, 6);
 
   // Validate CRC for temperature data
   if (calculateCRC8(buffer, 2) != buffer[2]) {
